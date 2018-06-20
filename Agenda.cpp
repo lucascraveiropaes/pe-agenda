@@ -4,6 +4,7 @@
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
+#include <time.h>
 
 #define MAX 200
 #define NAME_MAX 150
@@ -43,8 +44,8 @@ char menu() {
 	printf("1 --------- Inserir um novo contato \n");
 	printf("2 --------- Remover um contato pelo nome \n");
 	printf("3 --------- Pesquisar um contato pelo nome \n");
-	printf("4 --------- Listar na tela todos os contatos \n");
-	printf("5 --------- Imprimir na tela os aniversariantes do mês \n");
+	printf("4 --------- Listar todos os contatos \n");
+	printf("5 --------- Listar aniversariantes do mês \n");
 	printf("6 --------- Sair da execução do algoritmo \n");
 	
 	printf("\nSua opção: ");
@@ -194,6 +195,41 @@ int deleteContact() {
 	rename("agenda2.txt", FILENAME);
 }
 
+int getMonth() {
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+	return tm.tm_mon+1;
+}
+
+int monthBirthDays() {
+	char fName[NAME_MAX], fNameLowerCase[NAME_MAX], fPhone[PHONE_MAX], fBirthday[BIRTH_MAX], fBirthmonth[BIRTH_MAX], line[MAX];
+	bool hasBirthmonth = false;  // Variável para controlar se existe aniversariantes no mês
+	FILE *fptr  = fopen(FILENAME, "r"); // Abre arquivo para leitura
+	
+	if(fptr == NULL) { // Mensagem de erro caso não consiga abrir o arquivo
+		printf("\nNão foi possível listar aniversariantes.");
+		return 0;
+	}
+		
+	while(fgets(line, MAX, fptr) != NULL) {
+		sscanf(line, "%s %s %s %s\n", fName, fPhone, fBirthday, fBirthmonth); // Pega os dados da linha do arquivo
+				
+		if(atoi(fBirthmonth) == getMonth()) { // Compara o nome da linha atual do arquivo com o nome digitado pelo user
+			printf("\nContato: %s\n", fName);
+			printf("Telefone: %s\n", fPhone);
+			printf("Aniversário: %s / %s", fBirthday, fBirthmonth);
+			
+			hasBirthmonth = true; // Tranformando variável pra true se existe aniversariantes nesse mês
+		}	
+	}
+	
+	if( !hasBirthmonth ) { // Mensagem caso não exista aniversariantes
+		printf("\nNão existem aniversariantes esse mês.");
+	}
+	
+	fclose(fptr);
+}
+
 
 main() {
 	setlocale(LC_ALL, "Portuguese");
@@ -224,7 +260,7 @@ main() {
 				break;
 			}
 			case '5': {
-				printf("Opção %c", option);
+				monthBirthDays();
 				break;
 			}
 			case '6': {
